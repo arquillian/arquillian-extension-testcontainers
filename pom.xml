@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>51</version>
+        <version>52</version>
         <relativePath />
     </parent>
 
@@ -89,6 +89,7 @@
         <!-- Configuration properties -->
         <skipFormatting>false</skipFormatting>
         <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
+        <test.java.home>${java.home}</test.java.home>
 
         <!-- maven-release-plugin configuration -->
         <autoVersionSubmodules>true</autoVersionSubmodules>
@@ -176,6 +177,12 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <jvm>${test.java.home}${file.separator}bin${file.separator}java</jvm>
+                </configuration>
+            </plugin>
             <!-- Enable auto-formatting of source files -->
             <plugin>
                 <groupId>net.revelc.code.formatter</groupId>
