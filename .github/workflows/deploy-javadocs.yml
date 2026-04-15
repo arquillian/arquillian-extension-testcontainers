@@ -38,7 +38,7 @@ jobs:
           cache: 'maven'
           distribution: 'temurin'
       - name: Generate JavaDoc
-        run: mvn -B -ntp clean -Prelease javadoc:aggregate
+        run: ./mvnw -B -ntp clean -Pcentral-release javadoc:aggregate
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
