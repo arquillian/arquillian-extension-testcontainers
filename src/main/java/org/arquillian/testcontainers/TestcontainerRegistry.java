@@ -37,17 +37,43 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
      */
     GenericContainer<?> lookupOrCreate(final Class<GenericContainer<?>> type, final Testcontainer testcontainer,
             final List<Annotation> qualifiers) {
-        GenericContainer<?> result = lookup(type, qualifiers);
+        final String name = testcontainer.name();
+        GenericContainer<?> result = name.isEmpty() ? lookup(type, qualifiers) : lookup(name);
         if (result == null) {
             try {
                 final Constructor<? extends GenericContainer<?>> constructor = getConstructor(type, testcontainer);
                 result = constructor.newInstance();
-                this.containers.add(new TestcontainerDescription(testcontainer, result));
+                final TestcontainerDescription description = new TestcontainerDescription(testcontainer, result);
+                if (!name.isEmpty()) {
+                    for (TestcontainerDescription containerDesc : this.containers) {
+                        if (name.equals(containerDesc.name)) {
+                            throw new IllegalArgumentException(
+                                    String.format("A container with name \"%s\" is already registered", name));
+                        }
+                    }
+                }
+                this.containers.add(description);
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new IllegalArgumentException(String.format("Could create container %s", type.getName()), e);
             }
         }
         return result;
+    }
+
+    /**
+     * Lookup a container by name.
+     *
+     * @param name the container name
+     *
+     * @return the container instance or {@code null} if not found
+     */
+    GenericContainer<?> lookup(final String name) {
+        for (TestcontainerDescription containerDesc : this.containers) {
+            if (name.equals(containerDesc.name)) {
+                return containerDesc.instance;
+            }
+        }
+        return null;
     }
 
     /**
@@ -63,14 +89,14 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
         final List<TestcontainerDescription> foundContainers = new ArrayList<>();
         if (qualifiers.isEmpty()) {
             for (TestcontainerDescription containerDesc : this.containers) {
-                if (type.isAssignableFrom(containerDesc.instance.getClass())) {
+                if (containerDesc.name.isEmpty() && type.isAssignableFrom(containerDesc.instance.getClass())) {
                     foundContainers.add(containerDesc);
                 }
             }
         } else {
             for (TestcontainerDescription containerDesc : this.containers) {
                 for (Annotation qualifier : qualifiers) {
-                    if (type.isAssignableFrom(containerDesc.instance.getClass())
+                    if (containerDesc.name.isEmpty() && type.isAssignableFrom(containerDesc.instance.getClass())
                             && type.isAnnotationPresent(qualifier.annotationType())) {
                         foundContainers.add(containerDesc);
                     }

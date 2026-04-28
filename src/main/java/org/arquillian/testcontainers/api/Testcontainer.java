@@ -56,6 +56,17 @@ public @interface Testcontainer {
     boolean value() default true;
 
     /**
+     * An optional name for the container. When set, the container is registered and looked up by this name, allowing
+     * multiple containers of the same type to coexist in a single test class.
+     * <p>
+     * If left as the default empty string, the container is looked up by type and qualifiers as usual.
+     * </p>
+     *
+     * @return the name of the container, or an empty string for unnamed containers
+     */
+    String name() default "";
+
+    /**
      * The type used to create the value for the field. The type must have a no-arg constructor.
      * <p>
      * If left as the default value, {@link GenericContainer}, the type to construct is derived from the
