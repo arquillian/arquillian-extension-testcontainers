@@ -6,7 +6,7 @@
 package org.arquillian.testcontainers.common;
 
 import org.arquillian.testcontainers.api.LoggingConsumer;
-import org.testcontainers.containers.MockServerContainer;
+import org.testcontainers.mockserver.MockServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
 /**
