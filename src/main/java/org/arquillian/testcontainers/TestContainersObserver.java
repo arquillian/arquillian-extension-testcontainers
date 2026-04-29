@@ -8,7 +8,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.arquillian.testcontainers.api.TestcontainersRequired;
+import org.arquillian.testcontainers.api.event.AfterTestcontainerStart;
+import org.arquillian.testcontainers.api.event.AfterTestcontainerStop;
+import org.arquillian.testcontainers.api.event.BeforeTestcontainerStart;
+import org.arquillian.testcontainers.api.event.BeforeTestcontainerStop;
 import org.jboss.arquillian.container.spi.ContainerRegistry;
+import org.jboss.arquillian.core.api.Event;
 import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
@@ -31,6 +36,18 @@ class TestContainersObserver {
 
     @Inject
     private Instance<ContainerRegistry> registry;
+
+    @Inject
+    private Event<BeforeTestcontainerStart> beforeTestcontainerStart;
+
+    @Inject
+    private Event<AfterTestcontainerStart> afterTestcontainerStart;
+
+    @Inject
+    private Event<BeforeTestcontainerStop> beforeTestcontainerStop;
+
+    @Inject
+    private Event<AfterTestcontainerStop> afterTestcontainerStop;
 
     /**
      * This first checks if the {@link TestcontainersRequired} annotation is present on the test class failing if necessary. It
@@ -69,7 +86,9 @@ class TestContainersObserver {
         TestcontainerRegistry registry = containerRegistry.get();
         if (registry != null) {
             for (TestcontainerDescription container : registry) {
+                beforeTestcontainerStop.fire(new BeforeTestcontainerStop(container.instance));
                 container.instance.stop();
+                afterTestcontainerStop.fire(new AfterTestcontainerStop(container.instance));
             }
         }
     }
@@ -86,13 +105,15 @@ class TestContainersObserver {
             // Look for the servers to start on fields only
             for (TestcontainerDescription description : registry) {
                 if (description.testcontainer.value()) {
+                    beforeTestcontainerStart.fire(new BeforeTestcontainerStart(description.instance));
                     description.instance.start();
+                    afterTestcontainerStart.fire(new AfterTestcontainerStart(description.instance));
                 }
             }
         }
     }
 
-    @SuppressWarnings({ "resource", "BooleanMethodIsAlwaysInverted" })
+    @SuppressWarnings({ "BooleanMethodIsAlwaysInverted" })
     private boolean isDockerAvailable() {
         try {
             DockerClientFactory.instance().client();
