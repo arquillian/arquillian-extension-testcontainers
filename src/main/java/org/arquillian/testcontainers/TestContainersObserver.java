@@ -50,7 +50,7 @@ class TestContainersObserver {
                 if (overrideClass != null && !overrideClass.isBlank()) {
                     Class<?> override = Class.forName(overrideClass);
                     if (Throwable.class.isAssignableFrom(override)) {
-                        throwable = (Class<? extends Throwable>) override;
+                        throwable = override.asSubclass(Throwable.class);
                     }
                 }
                 throw createException(throwable);
