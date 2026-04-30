@@ -9,32 +9,33 @@ import org.arquillian.testcontainers.api.Testcontainer;
 import org.arquillian.testcontainers.api.TestcontainerLifecycle;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.arquillian.testcontainers.common.SimpleTestContainer;
+import org.arquillian.testcontainers.common.WildFlyContainer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit5.ArquillianExtension;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.opentest4j.TestAbortedException;
 
 /**
- * @author <a href="mailto:jperkins@redhat.com">James R. Perkins</a>
+ * Tests that suite-scoped and class-scoped containers coexist correctly in a single test class.
+ *
+ * @author Radoslav Husar
  */
 @ExtendWith(ArquillianExtension.class)
-@TestcontainersRequired(TestAbortedException.class)
 @RunAsClient
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ManualContainerTest {
+@TestcontainersRequired(TestAbortedException.class)
+public class MixedLifecycleTest {
 
-    @Testcontainer(TestcontainerLifecycle.MANUAL)
-    private static SimpleTestContainer container;
+    @Testcontainer(TestcontainerLifecycle.SUITE)
+    private SimpleTestContainer suiteContainer;
+
+    @Testcontainer(TestcontainerLifecycle.CLASS)
+    private WildFlyContainer classContainer;
 
     @Deployment
     public static JavaArchive createDeployment() {
@@ -42,22 +43,21 @@ public class ManualContainerTest {
                 .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
     }
 
-    @AfterAll
-    public static void shutdownContainer() {
-        container.close();
+    @Test
+    public void suiteContainerIsRunning() {
+        Assertions.assertNotNull(suiteContainer, "Expected the suite container to be injected.");
+        Assertions.assertTrue(suiteContainer.isRunning(), "Expected the suite container to be running");
     }
 
     @Test
-    @Order(1)
-    public void testContainerInjected() {
-        Assertions.assertNotNull(container, "Expected the container to be injected.");
-        Assertions.assertFalse(container.isRunning(), "Expected the container to not be running");
+    public void classContainerIsRunning() {
+        Assertions.assertNotNull(classContainer, "Expected the class container to be injected.");
+        Assertions.assertTrue(classContainer.isRunning(), "Expected the class container to be running");
     }
 
     @Test
-    @Order(2)
-    public void startContainer() {
-        container.start();
-        Assertions.assertTrue(container.isRunning(), "Expected the container to be running");
+    public void containersAreDifferentInstances() {
+        Assertions.assertNotSame(suiteContainer, classContainer,
+                "Suite and class containers should be different instances");
     }
 }
