@@ -7,20 +7,21 @@ package org.arquillian.testcontainers.api;
 import org.testcontainers.containers.GenericContainer;
 
 /**
- * Describes a testcontainer in the context of a lifecycle event. Provides the container name, whether it is managed
- * by Arquillian, and the container instance.
+ * Describes a testcontainer in the context of a lifecycle event. Provides the container name, lifecycle scope,
+ * and the container instance.
  *
  * @author Radoslav Husar
  */
 public class TestcontainerEventContext {
 
     private final String name;
-    private final boolean managed;
+    private final TestcontainerLifecycle lifecycle;
     private final GenericContainer<?> container;
 
-    public TestcontainerEventContext(final String name, final boolean managed, final GenericContainer<?> container) {
+    public TestcontainerEventContext(final String name, final TestcontainerLifecycle lifecycle,
+            final GenericContainer<?> container) {
         this.name = name;
-        this.managed = managed;
+        this.lifecycle = lifecycle;
         this.container = container;
     }
 
@@ -34,13 +35,21 @@ public class TestcontainerEventContext {
     }
 
     /**
-     * Returns whether this container's lifecycle is managed by Arquillian. This will be refactored with the
-     * implementation of <a href="https://github.com/arquillian/arquillian-extension-testcontainers/issues/126">#126</a>.
+     * Returns the lifecycle scope of this container.
+     *
+     * @return the lifecycle scope
+     */
+    public TestcontainerLifecycle getLifecycle() {
+        return lifecycle;
+    }
+
+    /**
+     * Returns whether this container's lifecycle is managed by Arquillian (i.e. not {@link TestcontainerLifecycle#MANUAL}).
      *
      * @return {@code true} if Arquillian manages start/stop
      */
     public boolean isManaged() {
-        return managed;
+        return lifecycle != TestcontainerLifecycle.MANUAL;
     }
 
     /**

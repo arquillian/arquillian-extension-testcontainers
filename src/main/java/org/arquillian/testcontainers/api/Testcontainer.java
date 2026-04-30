@@ -48,12 +48,19 @@ import org.testcontainers.containers.GenericContainer;
 public @interface Testcontainer {
 
     /**
-     * Indicates whether Arquillian should manage the starting of the Testcontainer. With a value of {@code false},
-     * Arquillian will not start the server. It will still attempt to stop the server.
+     * Defines the lifecycle scope for this Testcontainer.
+     * <ul>
+     * <li>{@link TestcontainerLifecycle#SUITE SUITE} - the container is started once on first encounter and stopped
+     * when the test suite ends; the same instance is shared across test classes</li>
+     * <li>{@link TestcontainerLifecycle#CLASS CLASS} - the container is started before each test class and stopped
+     * after it completes (default)</li>
+     * <li>{@link TestcontainerLifecycle#MANUAL MANUAL} - the container is created and injected but never started or
+     * stopped by the extension</li>
+     * </ul>
      *
-     * @return {@code true} to have Arquillian manage the lifecycle of the Testcontainer
+     * @return the lifecycle scope for this Testcontainer
      */
-    boolean value() default true;
+    TestcontainerLifecycle value() default TestcontainerLifecycle.CLASS;
 
     /**
      * An optional name for the container. When set, the container is registered and looked up by this name, allowing

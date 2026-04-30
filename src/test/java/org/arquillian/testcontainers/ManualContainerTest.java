@@ -6,6 +6,7 @@
 package org.arquillian.testcontainers;
 
 import org.arquillian.testcontainers.api.Testcontainer;
+import org.arquillian.testcontainers.api.TestcontainerLifecycle;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.arquillian.testcontainers.common.SimpleTestContainer;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -32,7 +33,7 @@ import org.opentest4j.TestAbortedException;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ManualContainerTest {
 
-    @Testcontainer(false)
+    @Testcontainer(TestcontainerLifecycle.MANUAL)
     private static SimpleTestContainer container;
 
     @Deployment

@@ -89,9 +89,33 @@ public class TypeSpecifiedInjectionTest {
 }
 ----
 
-By default, this extension will manage the lifecycle of each Testcontainer that is injected into the test. If you'd
-prefer to manage the lifecycle yourself, use the `value=true` attribute in the `@Testcontainer` annotation. For example
-use `@Testcontainer(false)`.
+=== Container Lifecycle
+
+By default, this extension manages the lifecycle of each Testcontainer per test class. The `@Testcontainer` annotation
+accepts a `TestcontainerLifecycle` value to control when containers are started and stopped:
+
+* `TestcontainerLifecycle.CLASS` (default) -- the container is started before each test class and stopped after it
+  completes.
+* `TestcontainerLifecycle.SUITE` -- the container is started once on first encounter and stopped when the test suite
+  ends. The same container instance is shared across all test classes that request the same type with suite lifecycle.
+  This is useful for expensive containers that do not need to be restarted between test classes.
+* `TestcontainerLifecycle.MANUAL` -- the container is created and injected but never started or stopped by the
+  framework. The user is responsible for managing the container lifecycle.
+
+[source,java]
+----
+// Suite-scoped container shared across test classes
+@Testcontainer(TestcontainerLifecycle.SUITE)
+private KeycloakContainer keycloak;
+
+// Class-scoped container (default behavior)
+@Testcontainer
+private SimpleTestContainer container;
+
+// Manually managed container
+@Testcontainer(TestcontainerLifecycle.MANUAL)
+private SimpleTestContainer manualContainer;
+----
 
 == Helpers
 
