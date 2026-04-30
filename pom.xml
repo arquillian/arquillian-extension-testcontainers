@@ -57,6 +57,13 @@
             <organization>Red Hat, Inc.</organization>
             <organizationUrl>https://redhat.com</organizationUrl>
         </developer>
+        <developer>
+            <id>rhusar</id>
+            <name>Radoslav Husar</name>
+            <email>rhusar@redhat.com</email>
+            <organization>Red Hat, Inc.</organization>
+            <organizationUrl>https://redhat.com</organizationUrl>
+        </developer>
     </developers>
 
     <scm>

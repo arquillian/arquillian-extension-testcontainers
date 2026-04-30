@@ -19,6 +19,12 @@ class TestcontainerDescription {
      * The annotation that was on the field
      */
     final Testcontainer testcontainer;
+
+    /**
+     * The name of the container, or an empty string for unnamed containers
+     */
+    final String name;
+
     /**
      * The instance of the container created
      */
@@ -26,6 +32,7 @@ class TestcontainerDescription {
 
     TestcontainerDescription(final Testcontainer testcontainer, final GenericContainer<?> instance) {
         this.testcontainer = testcontainer;
+        this.name = testcontainer.name();
         this.instance = instance;
     }
 }
