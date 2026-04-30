@@ -51,6 +51,37 @@ public class TestcontainerRegistryTest {
                 "Empty-string lookup should not return any registered container");
     }
 
+    @Test
+    public void lookupTreatsNullNameAsAbsent() throws Exception {
+        TestcontainerRegistry registry = new TestcontainerRegistry();
+        registry.lookupOrCreate(simpleType(), annotation("alphaFixture"), List.of());
+
+        Assertions.assertNull(registry.lookup((String) null));
+    }
+
+    @Test
+    public void typedLookupReturnsTypedContainer() throws Exception {
+        TestcontainerRegistry registry = new TestcontainerRegistry();
+        GenericContainer<?> alpha = registry.lookupOrCreate(simpleType(), annotation("alphaFixture"), List.of());
+
+        SimpleTestContainer typed = registry.lookup("alpha", SimpleTestContainer.class);
+        Assertions.assertSame(alpha, typed);
+        Assertions.assertNull(registry.lookup("missing", SimpleTestContainer.class));
+    }
+
+    @Test
+    public void typedLookupThrowsOnTypeMismatch() throws Exception {
+        TestcontainerRegistry registry = new TestcontainerRegistry();
+        registry.lookupOrCreate(simpleType(), annotation("alphaFixture"), List.of());
+
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> registry.lookup("alpha", IncompatibleContainer.class));
+    }
+
+    /** Distinct {@link GenericContainer} subtype used to exercise the type-mismatch path on typed lookup. */
+    private static class IncompatibleContainer extends GenericContainer<IncompatibleContainer> {
+    }
+
     @SuppressWarnings("unchecked")
     private static Class<GenericContainer<?>> simpleType() {
         return (Class<GenericContainer<?>>) (Class<?>) SimpleTestContainer.class;

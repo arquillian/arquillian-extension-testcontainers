@@ -69,11 +69,33 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
      */
     GenericContainer<?> lookup(final String name) {
         for (TestcontainerDescription containerDesc : this.containers) {
-            if (name.equals(containerDesc.name)) {
+            if (containerDesc.name.equals(name)) {
                 return containerDesc.instance;
             }
         }
         return null;
+    }
+
+    /**
+     * Typed lookup by name. Throws {@link IllegalArgumentException} if a container with the given name is registered
+     * but its runtime type is not assignable to {@code type}.
+     *
+     * @param name the container name
+     * @param type the expected container type
+     *
+     * @return the container cast to {@code type}, or {@code null} if no container with the given name is registered
+     */
+    <T extends GenericContainer<?>> T lookup(final String name, final Class<T> type) {
+        final GenericContainer<?> container = lookup(name);
+        if (container == null) {
+            return null;
+        }
+        if (!type.isInstance(container)) {
+            throw new IllegalArgumentException(
+                    String.format("Container with name '%s' is of type %s, which is not assignable to %s",
+                            name, container.getClass().getName(), type.getName()));
+        }
+        return type.cast(container);
     }
 
     /**
