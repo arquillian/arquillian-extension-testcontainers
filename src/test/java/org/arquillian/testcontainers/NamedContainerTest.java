@@ -33,6 +33,9 @@ public class NamedContainerTest {
     @Testcontainer(name = "first")
     private SimpleTestContainer first;
 
+    @Testcontainer(name = "first")
+    private SimpleTestContainer firstAgain;
+
     @Testcontainer(name = "second")
     private SimpleTestContainer second;
 
@@ -58,5 +61,10 @@ public class NamedContainerTest {
         Assertions.assertNotSame(first, second, "Expected named containers to be different instances.");
         Assertions.assertNotSame(first, unnamed, "Expected named and unnamed containers to be different instances.");
         Assertions.assertNotSame(second, unnamed, "Expected named and unnamed containers to be different instances.");
+    }
+
+    @Test
+    public void sameNameYieldsSameInstance() {
+        Assertions.assertSame(first, firstAgain, "Fields sharing a name must resolve to the same instance.");
     }
 }
