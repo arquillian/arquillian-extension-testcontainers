@@ -8,12 +8,13 @@ package org.arquillian.testcontainers;
 import java.util.List;
 
 import org.arquillian.testcontainers.api.Testcontainer;
+import org.arquillian.testcontainers.api.TestcontainerEventContext;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
-import org.arquillian.testcontainers.api.event.AfterTestcontainerStart;
-import org.arquillian.testcontainers.api.event.BeforeTestcontainerStart;
-import org.arquillian.testcontainers.api.event.TestcontainerEvent;
 import org.arquillian.testcontainers.common.SimpleTestContainer;
 import org.arquillian.testcontainers.common.TestcontainerEventObserver;
+import org.arquillian.testcontainers.spi.event.AfterTestcontainerStart;
+import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStart;
+import org.arquillian.testcontainers.spi.event.TestcontainerEvent;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit5.ArquillianExtension;
@@ -58,6 +59,23 @@ public class ContainerEventTest {
             if (event instanceof BeforeTestcontainerStart || event instanceof AfterTestcontainerStart) {
                 Assertions.assertSame(container, event.getContainer(),
                         "Expected event to reference the injected container");
+            }
+        }
+    }
+
+    @Test
+    public void startEventsContainContext() {
+        List<TestcontainerEvent> events = TestcontainerEventObserver.events();
+        for (TestcontainerEvent event : events) {
+            if (event instanceof BeforeTestcontainerStart || event instanceof AfterTestcontainerStart) {
+                TestcontainerEventContext context = event.getContext();
+                Assertions.assertNotNull(context, "Expected event to have a context");
+                Assertions.assertSame(container, context.getContainer(),
+                        "Expected context to reference the injected container");
+                Assertions.assertEquals("", context.getName(),
+                        "Expected unnamed container to have empty name");
+                Assertions.assertTrue(context.isManaged(),
+                        "Expected managed container to be marked as managed");
             }
         }
     }

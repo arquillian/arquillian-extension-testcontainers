@@ -2,9 +2,9 @@
  * Copyright The Arquillian Authors
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.arquillian.testcontainers.api.event;
+package org.arquillian.testcontainers.spi.event;
 
-import org.testcontainers.containers.GenericContainer;
+import org.arquillian.testcontainers.api.TestcontainerEventContext;
 
 /**
  * Fired before a managed testcontainer is started.
@@ -13,7 +13,7 @@ import org.testcontainers.containers.GenericContainer;
  */
 public class BeforeTestcontainerStart extends TestcontainerEvent {
 
-    public BeforeTestcontainerStart(final GenericContainer<?> container) {
-        super(container);
+    public BeforeTestcontainerStart(final TestcontainerEventContext context) {
+        super(context);
     }
 }
