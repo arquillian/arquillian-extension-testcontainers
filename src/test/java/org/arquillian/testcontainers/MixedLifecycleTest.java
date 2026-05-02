@@ -6,7 +6,7 @@
 package org.arquillian.testcontainers;
 
 import org.arquillian.testcontainers.api.Testcontainer;
-import org.arquillian.testcontainers.api.TestcontainerLifecycle;
+import org.arquillian.testcontainers.api.TestcontainerScope;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.arquillian.testcontainers.common.SimpleTestContainer;
 import org.arquillian.testcontainers.common.WildFlyContainer;
@@ -31,10 +31,10 @@ import org.opentest4j.TestAbortedException;
 @TestcontainersRequired(TestAbortedException.class)
 public class MixedLifecycleTest {
 
-    @Testcontainer(TestcontainerLifecycle.SUITE)
+    @Testcontainer(scope = TestcontainerScope.SUITE)
     private SimpleTestContainer suiteContainer;
 
-    @Testcontainer(TestcontainerLifecycle.CLASS)
+    @Testcontainer(scope = TestcontainerScope.CLASS)
     private WildFlyContainer classContainer;
 
     @Deployment

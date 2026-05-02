@@ -6,7 +6,7 @@
 package org.arquillian.testcontainers;
 
 import org.arquillian.testcontainers.api.Testcontainer;
-import org.arquillian.testcontainers.api.TestcontainerLifecycle;
+import org.arquillian.testcontainers.api.TestcontainerScope;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.arquillian.testcontainers.common.SimpleTestContainer;
 import org.jboss.arquillian.container.test.api.Deployment;
@@ -28,7 +28,7 @@ import org.opentest4j.TestAbortedException;
 @TestcontainersRequired(TestAbortedException.class)
 public class SuiteContainerTest {
 
-    @Testcontainer(TestcontainerLifecycle.SUITE)
+    @Testcontainer(scope = TestcontainerScope.SUITE)
     private SimpleTestContainer suiteContainer;
 
     @Deployment

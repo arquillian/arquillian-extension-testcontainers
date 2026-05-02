@@ -8,7 +8,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.arquillian.testcontainers.api.TestcontainerEventContext;
-import org.arquillian.testcontainers.api.TestcontainerLifecycle;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.arquillian.testcontainers.spi.event.AfterTestcontainerStart;
 import org.arquillian.testcontainers.spi.event.AfterTestcontainerStop;
@@ -130,7 +129,7 @@ class TestContainersObserver {
         }
         TestcontainerRegistryView registries = containerRegistries.get();
         if (registries != null) {
-            failure = stopAll(registries.classRegistry(), TestcontainerLifecycle.CLASS, failure);
+            failure = stopAll(registries.classRegistry(), failure);
         }
         if (failure != null) {
             throw failure;
@@ -154,8 +153,8 @@ class TestContainersObserver {
         if (registries == null) {
             return;
         }
-        startAll(registries.classRegistry(), TestcontainerLifecycle.CLASS);
-        startAll(registries.suiteRegistry(), TestcontainerLifecycle.SUITE);
+        startAll(registries.classRegistry());
+        startAll(registries.suiteRegistry());
     }
 
     /**
@@ -178,16 +177,16 @@ class TestContainersObserver {
         }
         TestcontainerRegistry suiteRegistry = suiteContainerRegistry.get();
         if (suiteRegistry != null) {
-            failure = stopAll(suiteRegistry, TestcontainerLifecycle.SUITE, failure);
+            failure = stopAll(suiteRegistry, failure);
         }
         if (failure != null) {
             throw failure;
         }
     }
 
-    private void startAll(final TestcontainerRegistry registry, final TestcontainerLifecycle lifecycle) {
+    private void startAll(final TestcontainerRegistry registry) {
         for (TestcontainerDescription description : registry) {
-            if (description.testcontainer.value() == lifecycle && !description.started) {
+            if (description.testcontainer.value() && !description.started) {
                 final TestcontainerEventContext context = createContext(description);
                 beforeTestcontainerStart.fire(new BeforeTestcontainerStart(context));
                 description.instance.start();
@@ -197,12 +196,8 @@ class TestContainersObserver {
         }
     }
 
-    private Throwable stopAll(final TestcontainerRegistry registry, final TestcontainerLifecycle lifecycle,
-            Throwable failure) {
+    private Throwable stopAll(final TestcontainerRegistry registry, Throwable failure) {
         for (TestcontainerDescription container : registry) {
-            if (container.testcontainer.value() != lifecycle) {
-                continue;
-            }
             try {
                 stop(container);
             } catch (Throwable t) {
@@ -225,7 +220,8 @@ class TestContainersObserver {
     }
 
     private static TestcontainerEventContext createContext(final TestcontainerDescription description) {
-        return new TestcontainerEventContext(description.name, description.testcontainer.value(), description.instance);
+        return new TestcontainerEventContext(description.name, description.testcontainer.scope(),
+                description.testcontainer.value(), description.instance);
     }
 
     @SuppressWarnings({ "resource", "BooleanMethodIsAlwaysInverted" })

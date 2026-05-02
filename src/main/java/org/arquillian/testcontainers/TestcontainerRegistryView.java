@@ -8,13 +8,13 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 
 import org.arquillian.testcontainers.api.Testcontainer;
-import org.arquillian.testcontainers.api.TestcontainerLifecycle;
+import org.arquillian.testcontainers.api.TestcontainerScope;
 import org.testcontainers.containers.GenericContainer;
 
 /**
  * A unified view over both the suite-scoped and class-scoped {@link TestcontainerRegistry} instances, routing
  * container lookup and creation to the appropriate registry based on the container's configured
- * {@link TestcontainerLifecycle lifecycle}.
+ * {@link TestcontainerScope scope}.
  * <p>
  * This class exists because Arquillian's {@link org.jboss.arquillian.core.api.Instance Instance&lt;T&gt;} injection
  * in {@link org.jboss.arquillian.test.spi.TestEnricher TestEnricher} services cannot carry scope annotations
@@ -37,7 +37,7 @@ class TestcontainerRegistryView {
 
     GenericContainer<?> lookupOrCreate(final Class<GenericContainer<?>> type, final Testcontainer testcontainer,
             final List<Annotation> qualifiers) {
-        if (testcontainer.value() == TestcontainerLifecycle.SUITE) {
+        if (testcontainer.scope() == TestcontainerScope.SUITE) {
             return suiteRegistry.lookupOrCreate(type, testcontainer, qualifiers);
         }
         return classRegistry.lookupOrCreate(type, testcontainer, qualifiers);
