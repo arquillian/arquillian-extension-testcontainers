@@ -8,7 +8,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.arquillian.testcontainers.api.TestcontainerEventContext;
-import org.arquillian.testcontainers.api.TestcontainerLifecycle;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.arquillian.testcontainers.spi.event.AfterTestcontainerStart;
 import org.arquillian.testcontainers.spi.event.AfterTestcontainerStop;
@@ -115,12 +114,10 @@ class TestContainersObserver {
         TestcontainerRegistryView registries = containerRegistries.get();
         if (registries != null) {
             for (TestcontainerDescription container : registries.classRegistry()) {
-                if (container.testcontainer.value() == TestcontainerLifecycle.CLASS) {
-                    final TestcontainerEventContext context = createContext(container);
-                    beforeTestcontainerStop.fire(new BeforeTestcontainerStop(context));
-                    container.instance.stop();
-                    afterTestcontainerStop.fire(new AfterTestcontainerStop(context));
-                }
+                final TestcontainerEventContext context = createContext(container);
+                beforeTestcontainerStop.fire(new BeforeTestcontainerStop(context));
+                container.instance.stop();
+                afterTestcontainerStop.fire(new AfterTestcontainerStop(context));
             }
         }
     }
@@ -138,7 +135,7 @@ class TestContainersObserver {
         }
 
         for (TestcontainerDescription description : registries.classRegistry()) {
-            if (description.testcontainer.value() == TestcontainerLifecycle.CLASS) {
+            if (description.testcontainer.value()) {
                 final TestcontainerEventContext context = createContext(description);
                 beforeTestcontainerStart.fire(new BeforeTestcontainerStart(context));
                 description.instance.start();
@@ -147,7 +144,7 @@ class TestContainersObserver {
         }
 
         for (TestcontainerDescription description : registries.suiteRegistry()) {
-            if (!description.instance.isRunning()) {
+            if (description.testcontainer.value() && !description.instance.isRunning()) {
                 final TestcontainerEventContext context = createContext(description);
                 beforeTestcontainerStart.fire(new BeforeTestcontainerStart(context));
                 description.instance.start();
@@ -174,7 +171,8 @@ class TestContainersObserver {
     }
 
     private static TestcontainerEventContext createContext(final TestcontainerDescription description) {
-        return new TestcontainerEventContext(description.name, description.testcontainer.value(), description.instance);
+        return new TestcontainerEventContext(description.name, description.testcontainer.scope(),
+                description.testcontainer.value(), description.instance);
     }
 
     @SuppressWarnings({ "resource", "BooleanMethodIsAlwaysInverted" })

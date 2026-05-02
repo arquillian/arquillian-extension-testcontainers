@@ -89,23 +89,25 @@ public class TypeSpecifiedInjectionTest {
 }
 ----
 
-=== Container Lifecycle
+=== Container Scope
 
 By default, this extension manages the lifecycle of each Testcontainer per test class. The `@Testcontainer` annotation
-accepts a `TestcontainerLifecycle` value to control when containers are started and stopped:
+accepts a `scope` attribute to control the container's scope:
 
-* `TestcontainerLifecycle.CLASS` (default) -- the container is started before each test class and stopped after it
+* `TestcontainerScope.CLASS` (default) -- the container is started before each test class and stopped after it
   completes.
-* `TestcontainerLifecycle.SUITE` -- the container is started once on first encounter and stopped when the test suite
-  ends. The same container instance is shared across all test classes that request the same type with suite lifecycle.
+* `TestcontainerScope.SUITE` -- the container is started once on first encounter and stopped when the test suite
+  ends. The same container instance is shared across all test classes that request the same type with suite scope.
   This is useful for expensive containers that do not need to be restarted between test classes.
-* `TestcontainerLifecycle.MANUAL` -- the container is created and injected but never started or stopped by the
-  framework. The user is responsible for managing the container lifecycle.
+
+The `value` attribute (default `true`) controls whether Arquillian manages the container lifecycle. Setting it to
+`false` means the container is created and injected but never started by the framework. The user is responsible for
+starting the container manually. This is orthogonal to scope -- you can have a manually managed suite-scoped container.
 
 [source,java]
 ----
 // Suite-scoped container shared across test classes
-@Testcontainer(TestcontainerLifecycle.SUITE)
+@Testcontainer(scope = TestcontainerScope.SUITE)
 private KeycloakContainer keycloak;
 
 // Class-scoped container (default behavior)
@@ -113,8 +115,12 @@ private KeycloakContainer keycloak;
 private SimpleTestContainer container;
 
 // Manually managed container
-@Testcontainer(TestcontainerLifecycle.MANUAL)
+@Testcontainer(false)
 private SimpleTestContainer manualContainer;
+
+// Manually managed suite-scoped container
+@Testcontainer(value = false, scope = TestcontainerScope.SUITE)
+private SimpleTestContainer manualSuiteContainer;
 ----
 
 == Helpers
