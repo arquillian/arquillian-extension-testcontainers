@@ -1,0 +1,45 @@
+/*
+ * Copyright The Arquillian Authors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package org.arquillian.testcontainers;
+
+import org.arquillian.testcontainers.api.Testcontainer;
+import org.arquillian.testcontainers.api.TestcontainerScope;
+import org.arquillian.testcontainers.api.TestcontainersRequired;
+import org.arquillian.testcontainers.common.SimpleTestContainer;
+import org.jboss.arquillian.container.test.api.Deployment;
+import org.jboss.arquillian.container.test.api.RunAsClient;
+import org.jboss.arquillian.junit5.ArquillianExtension;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.asset.EmptyAsset;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.opentest4j.TestAbortedException;
+
+/**
+ * @author Radoslav Husar
+ */
+@ExtendWith(ArquillianExtension.class)
+@RunAsClient
+@TestcontainersRequired(TestAbortedException.class)
+public class SuiteContainerTest {
+
+    @Testcontainer(scope = TestcontainerScope.SUITE)
+    private SimpleTestContainer suiteContainer;
+
+    @Deployment
+    public static JavaArchive createDeployment() {
+        return ShrinkWrap.create(JavaArchive.class)
+                .addAsManifestResource(EmptyAsset.INSTANCE, "beans.xml");
+    }
+
+    @Test
+    public void testSuiteContainerRunning() {
+        Assertions.assertNotNull(suiteContainer, "Expected the suite container to be injected.");
+        Assertions.assertTrue(suiteContainer.isRunning(), "Expected the suite container to be running");
+    }
+}
