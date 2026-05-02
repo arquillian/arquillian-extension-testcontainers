@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.arquillian.testcontainers.api.event.AfterTestcontainerStart;
-import org.arquillian.testcontainers.api.event.AfterTestcontainerStop;
-import org.arquillian.testcontainers.api.event.BeforeTestcontainerStart;
-import org.arquillian.testcontainers.api.event.BeforeTestcontainerStop;
-import org.arquillian.testcontainers.api.event.TestcontainerEvent;
+import org.arquillian.testcontainers.spi.event.AfterTestcontainerStart;
+import org.arquillian.testcontainers.spi.event.AfterTestcontainerStop;
+import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStart;
+import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStop;
+import org.arquillian.testcontainers.spi.event.TestcontainerEvent;
 import org.jboss.arquillian.core.api.annotation.Observes;
 
 /**

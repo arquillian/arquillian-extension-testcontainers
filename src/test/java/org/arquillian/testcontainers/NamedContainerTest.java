@@ -5,9 +5,16 @@
 
 package org.arquillian.testcontainers;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.arquillian.testcontainers.api.Testcontainer;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.arquillian.testcontainers.common.SimpleTestContainer;
+import org.arquillian.testcontainers.common.TestcontainerEventObserver;
+import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStart;
+import org.arquillian.testcontainers.spi.event.TestcontainerEvent;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit5.ArquillianExtension;
@@ -66,5 +73,17 @@ public class NamedContainerTest {
     @Test
     public void sameNameYieldsSameInstance() {
         Assertions.assertSame(first, firstAgain, "Fields sharing a name must resolve to the same instance.");
+    }
+
+    @Test
+    public void startEventsCarryContainerNames() {
+        List<TestcontainerEvent> events = TestcontainerEventObserver.events();
+        Set<String> names = events.stream()
+                .filter(e -> e instanceof BeforeTestcontainerStart)
+                .map(e -> e.getContext().getName())
+                .collect(Collectors.toSet());
+        Assertions.assertTrue(names.contains("first"), "Expected event with name 'first'");
+        Assertions.assertTrue(names.contains("second"), "Expected event with name 'second'");
+        Assertions.assertTrue(names.contains(""), "Expected event with empty name for unnamed container");
     }
 }

@@ -7,11 +7,12 @@ package org.arquillian.testcontainers;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.arquillian.testcontainers.api.TestcontainerEventContext;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
-import org.arquillian.testcontainers.api.event.AfterTestcontainerStart;
-import org.arquillian.testcontainers.api.event.AfterTestcontainerStop;
-import org.arquillian.testcontainers.api.event.BeforeTestcontainerStart;
-import org.arquillian.testcontainers.api.event.BeforeTestcontainerStop;
+import org.arquillian.testcontainers.spi.event.AfterTestcontainerStart;
+import org.arquillian.testcontainers.spi.event.AfterTestcontainerStop;
+import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStart;
+import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStop;
 import org.jboss.arquillian.container.spi.ContainerRegistry;
 import org.jboss.arquillian.core.api.Event;
 import org.jboss.arquillian.core.api.Instance;
@@ -86,9 +87,11 @@ class TestContainersObserver {
         TestcontainerRegistry registry = containerRegistry.get();
         if (registry != null) {
             for (TestcontainerDescription container : registry) {
-                beforeTestcontainerStop.fire(new BeforeTestcontainerStop(container.instance));
+                final TestcontainerEventContext context = new TestcontainerEventContext(container.name,
+                        container.testcontainer.value(), container.instance);
+                beforeTestcontainerStop.fire(new BeforeTestcontainerStop(context));
                 container.instance.stop();
-                afterTestcontainerStop.fire(new AfterTestcontainerStop(container.instance));
+                afterTestcontainerStop.fire(new AfterTestcontainerStop(context));
             }
         }
     }
@@ -105,9 +108,11 @@ class TestContainersObserver {
             // Look for the servers to start on fields only
             for (TestcontainerDescription description : registry) {
                 if (description.testcontainer.value()) {
-                    beforeTestcontainerStart.fire(new BeforeTestcontainerStart(description.instance));
+                    final TestcontainerEventContext context = new TestcontainerEventContext(description.name,
+                            description.testcontainer.value(), description.instance);
+                    beforeTestcontainerStart.fire(new BeforeTestcontainerStart(context));
                     description.instance.start();
-                    afterTestcontainerStart.fire(new AfterTestcontainerStart(description.instance));
+                    afterTestcontainerStart.fire(new AfterTestcontainerStart(context));
                 }
             }
         }
