@@ -7,6 +7,7 @@ package org.arquillian.testcontainers;
 import org.arquillian.testcontainers.api.Testcontainer;
 import org.arquillian.testcontainers.api.TestcontainersRequired;
 import org.arquillian.testcontainers.common.SimpleTestContainer;
+import org.arquillian.testcontainers.common.WildFlyContainer;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit5.ArquillianExtension;
@@ -46,5 +47,18 @@ public class RegistryInjectionTest {
         Assertions.assertSame(alpha, registry.lookup("alpha"));
         Assertions.assertSame(alpha, registry.lookup("alpha", SimpleTestContainer.class));
         Assertions.assertNull(registry.lookup("missing"));
+        Assertions.assertNull(registry.lookup("missing", SimpleTestContainer.class));
+    }
+
+    @Test
+    public void lookupGuardsNullAndEmptyName() {
+        Assertions.assertNull(registry.lookup(null));
+        Assertions.assertNull(registry.lookup(""));
+    }
+
+    @Test
+    public void typedLookupRejectsMismatchedType() {
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> registry.lookup("alpha", WildFlyContainer.class));
     }
 }
