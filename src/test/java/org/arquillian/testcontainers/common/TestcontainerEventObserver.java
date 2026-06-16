@@ -15,6 +15,7 @@ import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStart;
 import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStop;
 import org.arquillian.testcontainers.spi.event.TestcontainerEvent;
 import org.jboss.arquillian.core.api.annotation.Observes;
+import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
 
 /**
  * @author Radoslav Husar
@@ -23,6 +24,10 @@ import org.jboss.arquillian.core.api.annotation.Observes;
 public class TestcontainerEventObserver {
 
     private static final List<TestcontainerEvent> events = new ArrayList<>();
+
+    public void clearOnNewTestClass(@Observes BeforeClass event) {
+        events.clear();
+    }
 
     public void beforeStart(@Observes BeforeTestcontainerStart event) {
         events.add(event);

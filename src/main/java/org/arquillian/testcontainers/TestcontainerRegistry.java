@@ -18,7 +18,7 @@ import org.testcontainers.containers.GenericContainer;
 /**
  * A registry to store the testcontainer descriptions.
  */
-class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
+public class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
     private final List<TestcontainerDescription> containers;
 
     TestcontainerRegistry() {
@@ -65,9 +65,13 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
      *
      * @param name the container name
      *
-     * @return the container instance or {@code null} if not found
+     * @return the container instance, or {@code null} if {@code name} is {@code null}/empty or no container with that
+     *             name is registered
      */
-    GenericContainer<?> lookup(final String name) {
+    public GenericContainer<?> lookup(final String name) {
+        if (name == null || name.isEmpty()) {
+            return null;
+        }
         for (TestcontainerDescription containerDesc : this.containers) {
             if (containerDesc.name.equals(name)) {
                 return containerDesc.instance;
@@ -85,7 +89,7 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
      *
      * @return the container cast to {@code type}, or {@code null} if no container with the given name is registered
      */
-    <T extends GenericContainer<?>> T lookup(final String name, final Class<T> type) {
+    public <T extends GenericContainer<?>> T lookup(final String name, final Class<T> type) {
         final GenericContainer<?> container = lookup(name);
         if (container == null) {
             return null;

@@ -6,12 +6,14 @@ package org.arquillian.testcontainers;
 
 import org.jboss.arquillian.core.spi.LoadableExtension;
 import org.jboss.arquillian.test.spi.TestEnricher;
+import org.jboss.arquillian.test.spi.enricher.resource.ResourceProvider;
 
 class TestContainersExtension implements LoadableExtension {
     @Override
     public void register(ExtensionBuilder builder) {
         builder
                 .observer(TestContainersObserver.class)
-                .service(TestEnricher.class, ContainerInjectionTestEnricher.class);
+                .service(TestEnricher.class, ContainerInjectionTestEnricher.class)
+                .service(ResourceProvider.class, TestcontainerRegistryResourceProvider.class);
     }
 }
