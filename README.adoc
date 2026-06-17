@@ -89,9 +89,39 @@ public class TypeSpecifiedInjectionTest {
 }
 ----
 
-By default, this extension will manage the lifecycle of each Testcontainer that is injected into the test. If you'd
-prefer to manage the lifecycle yourself, use the `value=true` attribute in the `@Testcontainer` annotation. For example
-use `@Testcontainer(false)`.
+=== Container Scope
+
+By default, this extension manages the lifecycle of each Testcontainer per test class. The `@Testcontainer` annotation
+accepts a `scope` attribute to control the container's scope:
+
+* `TestcontainerScope.CLASS` (default) -- the container is started before each test class and stopped after it
+  completes.
+* `TestcontainerScope.SUITE` -- the container is started once on first encounter and stopped when the test suite
+  ends. The same container instance is shared across all test classes that request the same type with suite scope.
+  This is useful for expensive containers that do not need to be restarted between test classes.
+
+The `value` attribute (default `true`) controls whether Arquillian manages the container lifecycle. Setting it to
+`false` means the container is created and injected but never started by the framework. The user is responsible for
+starting the container manually. This is orthogonal to scope -- you can have a manually managed suite-scoped container.
+
+[source,java]
+----
+// Suite-scoped container shared across test classes
+@Testcontainer(scope = TestcontainerScope.SUITE)
+private KeycloakContainer keycloak;
+
+// Class-scoped container (default behavior)
+@Testcontainer
+private SimpleTestContainer container;
+
+// Manually managed container
+@Testcontainer(false)
+private SimpleTestContainer manualContainer;
+
+// Manually managed suite-scoped container
+@Testcontainer(value = false, scope = TestcontainerScope.SUITE)
+private SimpleTestContainer manualSuiteContainer;
+----
 
 == Helpers
 
