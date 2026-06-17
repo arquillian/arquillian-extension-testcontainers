@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.opentest4j.TestAbortedException;
 
+/**
+ * @author Radoslav Husar
+ */
 @ExtendWith(ArquillianExtension.class)
 @TestcontainersRequired(TestAbortedException.class)
 @RunAsClient

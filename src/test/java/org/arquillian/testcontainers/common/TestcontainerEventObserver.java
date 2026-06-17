@@ -15,14 +15,22 @@ import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStart;
 import org.arquillian.testcontainers.spi.event.BeforeTestcontainerStop;
 import org.arquillian.testcontainers.spi.event.TestcontainerEvent;
 import org.jboss.arquillian.core.api.annotation.Observes;
+import org.jboss.arquillian.test.spi.event.suite.BeforeClass;
 
 /**
+ * Observer that collects all of {@link TestcontainerEvent}s.
+ * All events are cleared during {@link BeforeClass} event.
+ *
  * @author Radoslav Husar
  */
 @SuppressWarnings("unused")
 public class TestcontainerEventObserver {
 
     private static final List<TestcontainerEvent> events = new ArrayList<>();
+
+    public void beforeClass(@Observes BeforeClass event) {
+        events.clear();
+    }
 
     public void beforeStart(@Observes BeforeTestcontainerStart event) {
         events.add(event);
@@ -42,9 +50,5 @@ public class TestcontainerEventObserver {
 
     public static List<TestcontainerEvent> events() {
         return Collections.unmodifiableList(events);
-    }
-
-    public static void clear() {
-        events.clear();
     }
 }
