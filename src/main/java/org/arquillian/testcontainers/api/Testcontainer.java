@@ -49,11 +49,25 @@ public @interface Testcontainer {
 
     /**
      * Indicates whether Arquillian should manage the starting of the Testcontainer. With a value of {@code false},
-     * Arquillian will not start the server. It will still attempt to stop the server.
+     * Arquillian will not start the server. It will still attempt to stop the server at the end of the configured
+     * {@link #scope() scope}.
      *
      * @return {@code true} to have Arquillian manage the lifecycle of the Testcontainer
      */
     boolean value() default true;
+
+    /**
+     * Defines the scope for this Testcontainer.
+     * <ul>
+     * <li>{@link TestcontainerScope#SUITE SUITE} - the container is started once on first encounter and stopped
+     * when the test suite ends; the same instance is shared across test classes</li>
+     * <li>{@link TestcontainerScope#CLASS CLASS} - the container is started before each test class and stopped
+     * after it completes (default)</li>
+     * </ul>
+     *
+     * @return the scope for this Testcontainer
+     */
+    TestcontainerScope scope() default TestcontainerScope.CLASS;
 
     /**
      * An optional name for the container. When set, the container is registered and looked up by this name, allowing

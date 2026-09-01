@@ -29,7 +29,7 @@ import org.testcontainers.containers.GenericContainer;
 @SuppressWarnings({ "unchecked" })
 public class ContainerInjectionTestEnricher implements TestEnricher {
     @Inject
-    private Instance<TestcontainerRegistry> instances;
+    private Instance<TestcontainerRegistryView> registries;
 
     @Override
     public void enrich(final Object testCase) {
@@ -60,7 +60,7 @@ public class ContainerInjectionTestEnricher implements TestEnricher {
                     }
                 }
 
-                value = instances.get()
+                value = registries.get()
                         .lookupOrCreate((Class<GenericContainer<?>>) field.getType(), testcontainer, qualifiers);
             } catch (Exception e) {
                 throw new RuntimeException("Could not lookup value for field " + field, e);
