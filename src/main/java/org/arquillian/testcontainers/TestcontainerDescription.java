@@ -30,6 +30,11 @@ class TestcontainerDescription {
      */
     final GenericContainer<?> instance;
 
+    /**
+     * Whether the container was already started, after which it must not be started again
+     */
+    volatile boolean started;
+
     TestcontainerDescription(final Testcontainer testcontainer, final GenericContainer<?> instance) {
         this.testcontainer = testcontainer;
         this.name = testcontainer.name();

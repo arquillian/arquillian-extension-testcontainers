@@ -15,6 +15,7 @@ public class TestLoadableExtension implements LoadableExtension {
     @Override
     public void register(final ExtensionBuilder builder) {
         builder.service(DeployableContainer.class, TestDeployableContainer.class)
-                .observer(TestcontainerEventObserver.class);
+                .observer(TestcontainerEventObserver.class)
+                .observer(EnrichmentAfterStopObserver.class);
     }
 }
