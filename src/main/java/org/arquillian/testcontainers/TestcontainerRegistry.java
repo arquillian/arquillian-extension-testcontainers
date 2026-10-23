@@ -38,21 +38,12 @@ class TestcontainerRegistry implements Iterable<TestcontainerDescription> {
     GenericContainer<?> lookupOrCreate(final Class<GenericContainer<?>> type, final Testcontainer testcontainer,
             final List<Annotation> qualifiers) {
         final String name = testcontainer.name();
-        GenericContainer<?> result = name.isEmpty() ? lookup(type, qualifiers) : lookup(name);
+        GenericContainer<?> result = name.isEmpty() ? lookup(type, qualifiers) : lookup(name, type);
         if (result == null) {
             try {
                 final Constructor<? extends GenericContainer<?>> constructor = getConstructor(type, testcontainer);
                 result = constructor.newInstance();
-                final TestcontainerDescription description = new TestcontainerDescription(testcontainer, result);
-                if (!name.isEmpty()) {
-                    for (TestcontainerDescription containerDesc : this.containers) {
-                        if (name.equals(containerDesc.name)) {
-                            throw new IllegalArgumentException(
-                                    String.format("A container with name \"%s\" is already registered", name));
-                        }
-                    }
-                }
-                this.containers.add(description);
+                this.containers.add(new TestcontainerDescription(testcontainer, result));
             } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
                 throw new IllegalArgumentException(String.format("Could create container %s", type.getName()), e);
             }

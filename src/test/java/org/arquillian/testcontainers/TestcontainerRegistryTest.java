@@ -25,6 +25,19 @@ public class TestcontainerRegistryTest {
     @Testcontainer(name = "alpha")
     private SimpleTestContainer alphaFixture;
 
+    @Testcontainer(name = "alpha")
+    private IncompatibleContainer incompatibleAlphaFixture;
+
+    @Test
+    public void sameNameWithIncompatibleTypeViaLookupOrCreateThrows() throws Exception {
+        TestcontainerRegistry registry = new TestcontainerRegistry();
+        registry.lookupOrCreate(simpleType(), annotation("alphaFixture"), List.of());
+
+        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class,
+                () -> registry.lookupOrCreate(incompatibleType(), annotation("incompatibleAlphaFixture"), List.of()));
+        Assertions.assertTrue(e.getMessage().contains(IncompatibleContainer.class.getName()), e.getMessage());
+    }
+
     @Test
     public void sameNameViaLookupOrCreateReturnsSameInstance() throws Exception {
         TestcontainerRegistry registry = new TestcontainerRegistry();
@@ -85,6 +98,11 @@ public class TestcontainerRegistryTest {
     @SuppressWarnings("unchecked")
     private static Class<GenericContainer<?>> simpleType() {
         return (Class<GenericContainer<?>>) (Class<?>) SimpleTestContainer.class;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Class<GenericContainer<?>> incompatibleType() {
+        return (Class<GenericContainer<?>>) (Class<?>) IncompatibleContainer.class;
     }
 
     private Testcontainer annotation(final String fieldName) throws NoSuchFieldException {
