@@ -99,6 +99,11 @@ class TestContainersObserver {
     /**
      * Starts all containers after enrichment is done. This happens after the {@link ContainerInjectionTestEnricher} is
      * invoked.
+     * <p>
+     * Each container is started at most once. Enrichment may happen after a container was stopped, either manually or
+     * by {@link #stopContainer(AfterClass)}, e.g. other extensions enriching objects during the {@link AfterClass}
+     * event. Restarting the container at that point would leave it running after the test class completed.
+     * </p>
      *
      * @param event the after enrichment event
      */
@@ -107,11 +112,12 @@ class TestContainersObserver {
         if (registry != null) {
             // Look for the servers to start on fields only
             for (TestcontainerDescription description : registry) {
-                if (description.testcontainer.value()) {
+                if (description.testcontainer.value() && !description.started) {
                     final TestcontainerEventContext context = new TestcontainerEventContext(description.name,
                             description.testcontainer.value(), description.instance);
                     beforeTestcontainerStart.fire(new BeforeTestcontainerStart(context));
                     description.instance.start();
+                    description.started = true;
                     afterTestcontainerStart.fire(new AfterTestcontainerStart(context));
                 }
             }
