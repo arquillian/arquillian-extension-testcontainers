@@ -10,7 +10,7 @@
     <parent>
         <groupId>org.jboss</groupId>
         <artifactId>jboss-parent</artifactId>
-        <version>54</version>
+        <version>55</version>
         <relativePath />
     </parent>
 
@@ -89,8 +89,6 @@
         <version.org.junit>5.14.4</version.org.junit>
 
         <!-- Plugin versions -->
-        <!-- TODO Newer than jboss-parent:53's 0.10.0; drop this when the parent catches up -->
-        <version.central-publishing.plugin>0.11.0</version.central-publishing.plugin>
         <version.formatter.maven.plugin>2.29.0</version.formatter.maven.plugin>
         <version.impsort.maven.plugin>1.13.0</version.impsort.maven.plugin>
 
@@ -102,9 +100,6 @@
         <!-- maven-release-plugin configuration -->
         <releaseProfiles>central-release</releaseProfiles>
         <arguments>-DskipTests -Dcentral.autoPublish=${central.autoPublish} -Dcentral.waitUntil=${central.waitUntil}</arguments>
-        <pushChanges>true</pushChanges>
-        <!-- Use the local directory when using perform -->
-        <localCheckout>true</localCheckout>
         <!-- Maven Central properties -->
         <central.deploymentName>${project.artifactId}-${project.version}</central.deploymentName>
     </properties>
