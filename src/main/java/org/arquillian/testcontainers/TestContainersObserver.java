@@ -19,6 +19,7 @@ import org.jboss.arquillian.core.api.Instance;
 import org.jboss.arquillian.core.api.InstanceProducer;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
+import org.jboss.arquillian.core.spi.EventContext;
 import org.jboss.arquillian.test.spi.TestClass;
 import org.jboss.arquillian.test.spi.annotation.ClassScoped;
 import org.jboss.arquillian.test.spi.event.enrichment.AfterEnrichment;
@@ -79,21 +80,52 @@ class TestContainersObserver {
     }
 
     /**
-     * Stops all containers, even ones not managed via Arquillian, after the test is complete
+     * Stops all containers, even ones not managed via Arquillian, after the test is complete.
+     * <p>
+     * The containers are stopped after all {@link AfterClass} observers were invoked, which may still use the
+     * containers, e.g. undeploying managed deployments or WildFly Arquillian tearing down server setup tasks. The
+     * containers are stopped even if one of the observers fails, e.g. on a failed undeployment, which would otherwise
+     * skip the remaining observers. A failure while stopping a container does not prevent stopping the remaining
+     * containers.
+     * </p>
      *
-     * @param afterClass the after class event
+     * @param context the after class event context
+     *
+     * @throws Throwable if an error occurs
      */
-    public void stopContainer(@Observes AfterClass afterClass) {
+    public void stopContainer(@Observes EventContext<AfterClass> context) throws Throwable {
+        Throwable failure = null;
+        try {
+            context.proceed();
+        } catch (Throwable t) {
+            failure = t;
+        }
         TestcontainerRegistry registry = containerRegistry.get();
         if (registry != null) {
             for (TestcontainerDescription container : registry) {
-                final TestcontainerEventContext context = new TestcontainerEventContext(container.name,
-                        container.testcontainer.value(), container.instance);
-                beforeTestcontainerStop.fire(new BeforeTestcontainerStop(context));
-                container.instance.stop();
-                afterTestcontainerStop.fire(new AfterTestcontainerStop(context));
+                try {
+                    stop(container);
+                } catch (Throwable t) {
+                    // Do not mask the first failure and continue stopping the remaining containers
+                    if (failure == null) {
+                        failure = t;
+                    } else {
+                        failure.addSuppressed(t);
+                    }
+                }
             }
         }
+        if (failure != null) {
+            throw failure;
+        }
+    }
+
+    private void stop(TestcontainerDescription container) {
+        TestcontainerEventContext context = new TestcontainerEventContext(container.name, container.testcontainer.value(),
+                container.instance);
+        beforeTestcontainerStop.fire(new BeforeTestcontainerStop(context));
+        container.instance.stop();
+        afterTestcontainerStop.fire(new AfterTestcontainerStop(context));
     }
 
     /**
@@ -101,7 +133,7 @@ class TestContainersObserver {
      * invoked.
      * <p>
      * Each container is started at most once. Enrichment may happen after a container was stopped, either manually or
-     * by {@link #stopContainer(AfterClass)}, e.g. other extensions enriching objects during the {@link AfterClass}
+     * by {@link #stopContainer(EventContext)}, e.g. other extensions enriching objects during the {@link AfterClass}
      * event. Restarting the container at that point would leave it running after the test class completed.
      * </p>
      *
