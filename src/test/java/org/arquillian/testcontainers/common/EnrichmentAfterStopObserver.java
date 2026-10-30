@@ -13,6 +13,7 @@ import org.arquillian.testcontainers.spi.event.AfterTestcontainerStop;
 import org.jboss.arquillian.core.api.Event;
 import org.jboss.arquillian.core.api.annotation.Inject;
 import org.jboss.arquillian.core.api.annotation.Observes;
+import org.jboss.arquillian.core.spi.EventContext;
 import org.jboss.arquillian.test.spi.event.enrichment.AfterEnrichment;
 import org.jboss.arquillian.test.spi.event.enrichment.EnrichmentEvent;
 import org.jboss.arquillian.test.spi.event.suite.AfterClass;
@@ -42,9 +43,11 @@ public class EnrichmentAfterStopObserver {
         stoppedContainers.add(event.getContainer());
     }
 
-    // Lower precedence ensures this observer is invoked after the containers were stopped
-    public void afterClass(@Observes(precedence = -100) AfterClass event) throws NoSuchMethodException {
-        if (event.getTestClass().getJavaClass() != NoRestartAfterStopTest.class) {
+    // Higher precedence wraps the interceptor stopping the containers, which have been stopped once this proceeds,
+    // while lower precedence than the class context interceptor keeps the class scoped container registry available
+    public void afterClass(@Observes(precedence = 50) EventContext<AfterClass> context) throws NoSuchMethodException {
+        context.proceed();
+        if (context.getEvent().getTestClass().getJavaClass() != NoRestartAfterStopTest.class) {
             return;
         }
         final Object instance = new Object();
