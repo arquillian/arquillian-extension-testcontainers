@@ -7,17 +7,21 @@ on:
   push:
     branches-ignore:
       - 'dependabot/**'
-    paths:
-      - '.github/workflows/maven.yml'
-      - '**/pom.xml'
-      - 'src/**'
+    paths-ignore:
+      - '**.adoc'
+      - '.github/dependabot.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'release.sh'
   pull_request:
     branches:
       - '**'
-    paths:
-      - '.github/workflows/maven.yml'
-      - '**/pom.xml'
-      - 'src/**'
+    paths-ignore:
+      - '**.adoc'
+      - '.github/dependabot.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'release.sh'
 
 # Only run the latest job
 concurrency:
@@ -61,14 +65,14 @@ jobs:
             11
             17
             21
-            26-ea
+            27
             25
           distribution: 'temurin'
           cache: 'maven'
       - name: Build and Test on ${{ matrix.os }} - Java 25
         run: ${{ env.MVN_CMD }} clean verify
-      - name: Build and Test on ${{ matrix.os }} - Java 26-ea
-        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_26_X64}}${{env.JAVA_HOME_26_ARM64}}' '-Dsurefire.reportsDirectory=target/surefire-reports-java26'
+      - name: Build and Test on ${{ matrix.os }} - Java 27
+        run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_27_X64}}${{env.JAVA_HOME_27_ARM64}}' '-Dsurefire.reportsDirectory=target/surefire-reports-java27'
       - name: Build and Test on ${{ matrix.os }} - Java 21
         run: ${{ env.MVN_CMD }} verify '-Dtest.java.home=${{env.JAVA_HOME_21_X64}}${{env.JAVA_HOME_21_ARM64}}' '-Dsurefire.reportsDirectory=target/surefire-reports-java21'
       - name: Build and Test on ${{ matrix.os }} - Java 17
