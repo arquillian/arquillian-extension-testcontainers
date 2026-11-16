@@ -7,17 +7,21 @@ on:
   push:
     branches-ignore:
       - 'dependabot/**'
-    paths:
-      - '.github/workflows/maven.yml'
-      - '**/pom.xml'
-      - 'src/**'
+    paths-ignore:
+      - '**.adoc'
+      - '.github/dependabot.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'release.sh'
   pull_request:
     branches:
       - '**'
-    paths:
-      - '.github/workflows/maven.yml'
-      - '**/pom.xml'
-      - 'src/**'
+    paths-ignore:
+      - '**.adoc'
+      - '.github/dependabot.yml'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'release.sh'
 
 # Only run the latest job
 concurrency:
